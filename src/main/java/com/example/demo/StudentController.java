@@ -1,6 +1,10 @@
 package com.example.demo;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,22 +26,39 @@ public class StudentController {
     }
 
     @GetMapping(value="/{id}")
-    public Optional<Student> getStudent(@PathVariable Integer id) {
-        return studentService.getStudentById(id);
+    public ResponseEntity<?> getStudent(@PathVariable Integer id) {
+        Optional<Student> student = studentService.getStudentById(id);
+        if (student.isPresent())
+            return ResponseEntity.status(HttpStatus.OK).body(student.get());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No valid ID.");
     }
 
     @PostMapping(value="/new_student")
-    public Student createStudent(@RequestBody Student student) {
-        return studentService.createStudent(student);
+    public ResponseEntity<?> createStudent(@Valid @RequestBody Student student, BindingResult result) {
+        if (result.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Validation error: Student name mustn't be blank.");
+        }
+        Student savedStudent = studentService.createStudent(student);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedStudent);
     }
 
     @PutMapping(value="/{id}")
-    public Optional<Student> updateStudent(@RequestBody Student student, @PathVariable Integer id) {
-        return studentService.updateStudent(student, id);
+    public ResponseEntity<?> updateStudent(@Valid @RequestBody Student student, BindingResult result, @PathVariable Integer id) {
+        if (result.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Validation error: Student name mustn't be blank.");
+        }
+        Optional<Student> updatedStudent = studentService.updateStudent(student, id);
+        if (updatedStudent.isPresent())
+            return ResponseEntity.status(HttpStatus.OK).body(updatedStudent.get());
+        else
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No valid ID.");
     }
 
     @DeleteMapping(value="/{id}")
-    public Optional<Student> deleteStudent(@PathVariable Integer id) {
-        return studentService.deleteStudent(id);
+    public ResponseEntity<?> deleteStudent(@PathVariable Integer id) {
+        Optional<Student> student = studentService.deleteStudent(id);
+        if (student.isPresent())
+                return ResponseEntity.status(HttpStatus.OK).body(student.get());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No valid ID.");
     }
 }

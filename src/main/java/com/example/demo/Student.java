@@ -4,13 +4,17 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer studentId;
+    @NotBlank(message = "Student name mustn't be blank.")
     private String studentName;
+    @NotBlank(message = "Student class mustn't be blank.")
     private String studentClass;
 
     public Student() {
